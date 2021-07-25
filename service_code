@@ -1,0 +1,35 @@
+def model(frame):
+    return True
+
+def start_motion(frame, hand_area):
+    return model(resize_hand(frame, hand_area, 300,400, 0))
+        
+def fix_rectangle():
+
+    cfg, weights = dir_item(PATH_YOLO)
+    net, output_layers = make_model(weights, cfg)
+    cam = cv2.VideoCapture(0)
+    find_coordinate = 0
+    while cv2.waitKey(33) != ord('q'):
+        success, frame = cam.read()
+        if success:
+            if find_coordinate < 15:
+                coordinate = get_coordinate(320, frame, net,output_layers)
+                if coordinate and start_motion(frame, coordinate):                    
+                    find_coordinate += 1
+            
+            elif find_coordinate == 15:
+                x, y, w, h = coordinate
+                find_coordinate += 1
+                print('Hand Detected!!!!!!')
+            
+            else:               
+                cv2.rectangle(frame, (x,y), (x+w, y+h), (0,255,0), 3)
+                
+            cv2.imshow('frame',frame)
+        
+        else:
+            break
+
+    cam.release()
+    cv2.destroyAllWindows()
